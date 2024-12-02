@@ -66,7 +66,7 @@ public class Program7{
 
     }
 
-        // ***************************************************************
+    // ***************************************************************
     //
     // Method:      
     //
@@ -78,6 +78,17 @@ public class Program7{
     //
     // **************************************************************
     public void initiateLearning(){
+        System.out.println("Hello, welcome to computer assisted mathematics! Let us math!!\n");
+
+        String basicQuestion = ArithmeticOperations.basicLevelDifficulty();
+        System.out.println(basicQuestion);
+
+        String intermediateQuestion = ArithmeticOperations.intermediateLevelDifficulty(); 
+        System.out.println(intermediateQuestion);
+
+        String advancedQuestion = ArithmeticOperations.advancedLevelDifficulty(); 
+        System.out.println(advancedQuestion);
+        
         correctAnswerResponses();
         incorrectAnswerResponses();
     }
