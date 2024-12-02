@@ -18,30 +18,37 @@
 //
 //********************************************************************
 
-
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 public class Logger {
-    private static PrintWriter logWriter;
 
-    public static void initLogFile() throws IOException {
-        logWriter = new PrintWriter(new FileWriter("Program7-Output.txt", true));
-        logWriter.println("Program started.");
-    }
-
-    public static void closeLogFile() {
-        if (logWriter != null) {
-            logWriter.close();
+    // method to generate a unique filename by incrementing a number
+    public static String getUniqueFilename() {
+        int fileIndex = 1;  // start with 1
+        String filename = "Program7-Output_" + fileIndex + ".txt";
+        File file = new File(filename);
+        
+        // increment the fileIndex until a unique filename is found
+        while (file.exists()) {
+            fileIndex++;
+            filename = "Program7-Output_" + fileIndex + ".txt";
+            file = new File(filename);
         }
+        return filename;
     }
 
-    public static void logCorrectAnswer(String question, int answer) {
-        logWriter.println("Correct Answer: " + question + " Your Answer: " + answer);
-    }
+    // method to log a message to the unique file
+    public static void log(String message) {
+        // get the unique filename for the current run
+        String filename = getUniqueFilename();
 
-    public static void logIncorrectAnswer(String question, int answer) {
-        logWriter.println("Incorrect Answer: " + question + " Your Answer: " + answer);
+        // try-with-resources to handle file writing
+        try (FileWriter writer = new FileWriter(filename, true)) {
+            writer.write(message + "\n"); 
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
     }
 }
