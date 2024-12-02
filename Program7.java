@@ -18,11 +18,21 @@
 //
 //********************************************************************
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Program7{
+
+    public static Scanner scanner = new Scanner(System.in);
+    public static int correctBasic = 0;
+    public static int totalQuestionsBasic = 0;
+    public static int correctIntermediate = 0;
+    public static int totalQuestionsIntermediate = 0;
+    public static int correctAdvanced = 0;
+    public static int totalQuestionsAdvanced = 0;
 
     // ***************************************************************
     //
@@ -77,99 +87,207 @@ public class Program7{
     // Returns:     
     //
     // **************************************************************
-    public void initiateLearning(){
-        System.out.println("Hello, welcome to computer assisted mathematics! Let us math!!\n");
 
-        String basicQuestion = ArithmeticOperations.basicLevelDifficulty();
-        System.out.println(basicQuestion);
-
-        String intermediateQuestion = ArithmeticOperations.intermediateLevelDifficulty(); 
-        System.out.println(intermediateQuestion);
-
-        String advancedQuestion = ArithmeticOperations.advancedLevelDifficulty(); 
-        System.out.println(advancedQuestion);
-        
-        correctAnswerResponses();
-        incorrectAnswerResponses();
-    }
-
-
-
-    // ***************************************************************
-    //
-    // Method:      
-    //
-    // Description: 
-    //
-    // Parameters:  
-    //
-    // Returns:     
-    //
-    // **************************************************************
-
-    public void correctAnswerResponses(){
-        // create and add correct responses to an array
-        List<String> correctResponses = new ArrayList<>(); 
-
-        correctResponses.add("Excellent!");  
-        correctResponses.add("Very good!");        
-        correctResponses.add("Nice work!");        
-        correctResponses.add("Way to go!");        
-        correctResponses.add("Keep up the good work!");  
-        
-        displayResponse(correctResponses);
-
-    }
-
-
-    // ***************************************************************
-    //
-    // Method:      
-    //
-    // Description: 
-    //
-    // Parameters:  
-    //
-    // Returns:     
-    //
-    // **************************************************************
-    public void incorrectAnswerResponses(){
-        // create and add incorrect responses to an array
-        List<String> incorrectResponses = new ArrayList<>(); 
-
-        incorrectResponses.add("That is incorrect!");  
-        incorrectResponses.add("No. Please try again!");        
-        incorrectResponses.add("Wrong, try once more!");        
-        incorrectResponses.add("No. Don't give up!");        
-        incorrectResponses.add("Incorrect. Keep trying!");      
-        
-        displayResponse(incorrectResponses);
-    
-    }
-
-
-    // ***************************************************************
-    //
-    // Method:      
-    //
-    // Description: 
-    //
-    // Parameters:  
-    //
-    // Returns:     
-    //
-    // **************************************************************
-    public void displayResponse(List<String> responses){
-        // catch an error with responses
-        if (responses.isEmpty()){
-            System.out.println("Error generating response. My bad.");
+    public void startProgram() {
+        try {
+            Logger.initLogFile();
+            initiateLearning(); // Start the program logic
+        } catch (IOException e) {
+            System.out.println("Error initializing log file.");
+            e.printStackTrace();
+        } finally {
+            Logger.closeLogFile();
         }
+    }
 
-        // display randomly selected correct responses to user
-        Random random = new Random(); 
-        int randomIndex = random.nextInt(responses.size()); 
-        System.out.println(responses.get(randomIndex));
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
 
+    public static void initiateLearning() {
+        int level = 1; // Always start at the basic level
+        while (level > 0 && level <= 3) {
+            level = playLevel(level); // Play the current level and return the next level (or 0 if exit)
+        }
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static int playLevel(int level) {
+        int correctAnswersInRow = 0;
+        int totalQuestions = 0;
+    
+        while (correctAnswersInRow < 5) { // Need 5 correct answers in a row to proceed
+            totalQuestions++;
+            String question = QuestionGenerator.generateQuestion(level);
+            System.out.println("Question: " + question);
+            int correctAnswer = QuestionGenerator.evaluateQuestion(question);
+    
+            boolean correct = false; // Flag to track if the answer is correct
+            while (!correct) {
+                System.out.print("Your answer: ");
+                int studentAnswer = getAnswer();
+    
+                if (studentAnswer == correctAnswer) {
+                    Logger.logCorrectAnswer(question, studentAnswer);
+                    ResponseHandler.printCorrectResponse();
+                    correctAnswersInRow++;
+                    correct = true; // Correct answer, exit the loop
+                } else {
+                    Logger.logIncorrectAnswer(question, studentAnswer);
+                    ResponseHandler.printIncorrectResponse();
+                    correctAnswersInRow = 0; // Reset streak if the answer is incorrect
+                    // We don't generate a new question; it will be the same question
+                    System.out.println("Question: " + question); // Show the same question again
+                }
+            }
+    
+            totalQuestions++;
+        }
+    
+        updateCorrectAnswers(level, correctAnswersInRow);
+        updateTotalQuestions(level, totalQuestions);
+    
+        return askLevelChoice(level);
+    }
+    
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static int getAnswer() {
+        while (!scanner.hasNextInt()) {
+            System.out.println("Please enter a valid integer.");
+            scanner.next(); // consume the invalid input
+        }
+        return scanner.nextInt();
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static void updateCorrectAnswers(int level, int correctAnswers) {
+        if (level == 1) correctBasic += correctAnswers;
+        else if (level == 2) correctIntermediate += correctAnswers;
+        else if (level == 3) correctAdvanced += correctAnswers;
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static void updateTotalQuestions(int level, int totalQuestions) {
+        if (level == 1) totalQuestionsBasic += totalQuestions;
+        else if (level == 2) totalQuestionsIntermediate += totalQuestions;
+        else if (level == 3) totalQuestionsAdvanced += totalQuestions;
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static int askLevelChoice(int level) {
+        System.out.println("Do you want to (1) Continue at this level, (2) Move to a more difficult level, (3) Exit?");
+        int choice = getAnswer();
+        if (choice == 1) {
+            return level;
+        } else if (choice == 2) {
+            return level + 1; // Move to the next level
+        } else {
+            showSummary();
+            return 0; // Exit the program
+        }
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static void showSummary() {
+        System.out.println("Summary of your performance:");
+        System.out.println("Basic Level: " + correctBasic + "/" + totalQuestionsBasic + " (" + getPercentage(correctBasic, totalQuestionsBasic) + "% correct)");
+        System.out.println("Intermediate Level: " + correctIntermediate + "/" + totalQuestionsIntermediate + " (" + getPercentage(correctIntermediate, totalQuestionsIntermediate) + "% correct)");
+        System.out.println("Advanced Level: " + correctAdvanced + "/" + totalQuestionsAdvanced + " (" + getPercentage(correctAdvanced, totalQuestionsAdvanced) + "% correct)");
+
+        if (getPercentage(correctBasic, totalQuestionsBasic) < 80) {
+            System.out.println("Please ask your teacher for extra help.");
+        }
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static double getPercentage(int correct, int total) {
+        return total == 0 ? 0.0 : ((double) correct / total) * 100;
     }
 
 
