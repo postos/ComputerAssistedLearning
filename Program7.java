@@ -112,26 +112,26 @@ public class Program7 {
     public static int playLevel(int level) {
         int correctAnswersInRow = 0;
         int totalQuestions = 0;
-    
+
         while (true) { // Keep asking questions until the user decides to exit
             totalQuestions++;
             String question = QuestionGenerator.generateQuestion(level);
             System.out.println("\nQuestion: " + question);
             int correctAnswer = QuestionGenerator.evaluateQuestion(question);
-    
+
             boolean correct = false; // Flag to track if the answer is correct
             while (!correct) {
                 System.out.print(">>> ");
                 int studentAnswer = getAnswer();
-    
+
                 if (studentAnswer == correctAnswer) {
                     Logger.logCorrectAnswer(question, studentAnswer);
                     ResponseHandler.printCorrectResponse();
                     correctAnswersInRow++;
                     System.out.println("Correct answers in a row: " + correctAnswersInRow);
                     correct = true; // Correct answer, exit the inner loop
-    
-                    if (correctAnswersInRow >= 5) {
+
+                    if (correctAnswersInRow >= 2) {
                         int choice = askLevelChoice(level); // Get user's choice
                         if (choice == level) {
                             // Stay at the same level
@@ -238,24 +238,66 @@ public class Program7 {
 
     public static int askLevelChoice(int level) {
         while (true) {
-            System.out.println("\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
+            if (level == 3) {
+                System.out.println("You have reached the most advanced level. Keep up the good work. Press (1) to continue or (0) to exit.");
+            } else {
+                System.out.println("\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
+            }
+    
             int choice = getAnswer(); // get user input
-            if (choice == 1 || choice == 2 || choice == 0) {
-                if (choice == 1) {
+    
+            switch (choice) {
+                case 1:
                     return level; // stay at the current level
-                } else if (choice == 2) {
-                    return level + 1; // move to the next level
-                } else {
+                case 2:
+                    if (level < 3) {
+                        return level + 1; // move to the next level
+                    } else {
+                        System.out.println("You are already at the most advanced level.");
+                        return level; // max level reached
+                    }
+                case 0:
                     System.out.println("\nRESULT SUMMARY: ");
                     System.out.println("---------------------------------");
                     showSummary();
-                    return 0; // Exit the program
-                }
-            } else {
-                System.out.println("Invalid choice. Please enter 0, 1, or 2.");
+                    return 0; // exit the program
+                default:
+                    System.out.println("Invalid choice. Please enter 0, 1, or 2.");
             }
         }
     }
+    
+
+    // public static int askLevelChoice(int level) {
+    //     while (true) {
+    //         if (level == 3) {
+    //             System.out.println("You have reached the most advanced level. Keep up the good work. Press (1) to continue or (0) to exit.");
+    //             int choice = getAnswer();
+    //             return choice;
+    //         } else {
+    //             System.out.println("\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
+    //             int choice = getAnswer(); // get user input
+    //             if (choice == 1 || choice == 2 || choice == 0) {
+    //                 if (choice == 1) {
+    //                     return level; // stay at the current level
+    //                 } else if (choice == 2) {
+    //                     if (level == 3) {
+    //                         return level; // max level reached
+    //                     } else {
+    //                         return level + 1; // move to the next level
+    //                     }
+    //                 } else {
+    //                     System.out.println("\nRESULT SUMMARY: ");
+    //                     System.out.println("---------------------------------");
+    //                     showSummary();
+    //                     return 0; // Exit the program
+    //                 }
+    //             } else {
+    //                 System.out.println("Invalid choice. Please enter 0, 1, or 2.");
+    //             }
+    //         }
+    //     }
+    // }
 
     // ***************************************************************
     //
