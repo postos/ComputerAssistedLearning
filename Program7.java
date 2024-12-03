@@ -72,32 +72,8 @@ public class Program7{
         System.out.println("Course:   COSC 4301 Modern Programming");
         System.out.println("Program:  7");
         System.out.println("Due Date: 12/11/2024");
-        System.out.println("*****************************************\n");
+        System.out.println("*****************************************");
 
-    }
-
-    // ***************************************************************
-    //
-    // Method:      
-    //
-    // Description: 
-    //
-    // Parameters:  
-    //
-    // Returns:     
-    //
-    // **************************************************************
-
-    public void startProgram() {
-        try {
-            Logger.initLogFile();
-            initiateLearning(); // Start the program logic
-        } catch (IOException e) {
-            System.out.println("Error initializing log file.");
-            e.printStackTrace();
-        } finally {
-            Logger.closeLogFile();
-        }
     }
 
     // ***************************************************************
@@ -113,10 +89,12 @@ public class Program7{
     // **************************************************************
 
     public static void initiateLearning() {
-        int level = 1; // Always start at the basic level
+        Logger.initLogFile();
+        int level = 1; // always start at the basic level
         while (level > 0 && level <= 3) {
-            level = playLevel(level); // Play the current level and return the next level (or 0 if exit)
+            level = playLevel(level); // play the current level and return the next level (or 0 if exit)
         }
+        System.out.println("\nGame over.Have a day or whatever.");
     }
 
     // ***************************************************************
@@ -135,40 +113,49 @@ public class Program7{
         int correctAnswersInRow = 0;
         int totalQuestions = 0;
     
-        while (correctAnswersInRow < 5) { // Need 5 correct answers in a row to proceed
+        while (true) { // Keep asking questions until the user decides to exit
             totalQuestions++;
             String question = QuestionGenerator.generateQuestion(level);
-            System.out.println("Question: " + question);
+            System.out.println("\nQuestion: " + question);
             int correctAnswer = QuestionGenerator.evaluateQuestion(question);
     
             boolean correct = false; // Flag to track if the answer is correct
             while (!correct) {
-                System.out.print("Your answer: ");
+                System.out.print(">>> ");
                 int studentAnswer = getAnswer();
     
                 if (studentAnswer == correctAnswer) {
                     Logger.logCorrectAnswer(question, studentAnswer);
                     ResponseHandler.printCorrectResponse();
                     correctAnswersInRow++;
-                    correct = true; // Correct answer, exit the loop
+                    System.out.println("Correct answer counter: " + correctAnswersInRow);
+                    correct = true; // Correct answer, exit the inner loop
+    
+                    // Check if the user wants to continue or change levels
+                    if (correctAnswersInRow >= 5) {
+                        int choice = askLevelChoice(level);
+                        if (choice == 1) {
+                            // Stay at the same level, continue the loop
+                            System.out.println("Continuing at level " + level);
+                        } else if (choice == 2) {
+                            // Move to a more difficult level
+                            level++;
+                            correctAnswersInRow = 0; // Reset streak for the new level
+                            System.out.println("Moving to level " + level);
+                        } else if (choice == 0) {
+                            // Exit the program
+                            return choice; // Exit the method
+                        }
+                    }
                 } else {
                     Logger.logIncorrectAnswer(question, studentAnswer);
                     ResponseHandler.printIncorrectResponse();
                     correctAnswersInRow = 0; // Reset streak if the answer is incorrect
-                    // We don't generate a new question; it will be the same question
                     System.out.println("Question: " + question); // Show the same question again
                 }
             }
-    
-            totalQuestions++;
         }
-    
-        updateCorrectAnswers(level, correctAnswersInRow);
-        updateTotalQuestions(level, totalQuestions);
-    
-        return askLevelChoice(level);
     }
-    
 
     // ***************************************************************
     //
@@ -239,7 +226,7 @@ public class Program7{
     // **************************************************************
 
     public static int askLevelChoice(int level) {
-        System.out.println("Do you want to (1) Continue at this level, (2) Move to a more difficult level, (3) Exit?");
+        System.out.println("Do you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
         int choice = getAnswer();
         if (choice == 1) {
             return level;
