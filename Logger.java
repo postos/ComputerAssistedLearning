@@ -72,7 +72,7 @@ public class Logger {
             // get a unique log file name
             currentLogFile = getUniqueLogFileName();
             logWriter = new PrintWriter(new FileWriter(currentLogFile, true)); // open in append mode
-            logWriter.println("Program started.");
+            logWriter.println("Program started...\n");
         } catch (IOException e){
             System.err.println("Error: Initialization failed.");
         }
@@ -110,7 +110,9 @@ public class Logger {
 
     public static void logCorrectAnswer(String question, int answer) {
         if (logWriter != null) {
-            logWriter.println("Correct Answer: " + question + " Your Answer: " + answer);
+            logWriter.println("Question: " + question);
+            logWriter.println("Your Correct Answer: " + answer);
+            logWriter.println("-----------------------------------");;
             logWriter.flush();
         }
     }
@@ -129,7 +131,9 @@ public class Logger {
 
     public static void logIncorrectAnswer(String question, int answer) {
         if (logWriter != null) {
-            logWriter.println("Incorrect Answer: " + question + " Your Answer: " + answer);
+            logWriter.println("Question: " + question);
+            logWriter.println("Your Incorrect Answer: " + answer);
+            logWriter.println("-----------------------------------");;
             logWriter.flush();
         }
     }
