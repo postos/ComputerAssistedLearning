@@ -18,37 +18,120 @@
 //
 //********************************************************************
 
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class Logger {
 
-    // method to generate a unique filename by incrementing a number
-    public static String getUniqueFilename() {
-        int fileIndex = 1;  // start with 1
-        String filename = "Program7-Output_" + fileIndex + ".txt";
-        File file = new File(filename);
+    public static PrintWriter logWriter;
+    public static String logFileName = "Program7-Output"; 
+    public static String currentLogFile; // current log file with index
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static String getUniqueLogFileName() {
+        int index = 1;  // Start with 1
+        File file = new File(logFileName + "_" + index + ".txt");
         
-        // increment the fileIndex until a unique filename is found
+        // increment the index until a unique filename is found
         while (file.exists()) {
-            fileIndex++;
-            filename = "Program7-Output_" + fileIndex + ".txt";
-            file = new File(filename);
+            index++;
+            file = new File(logFileName + "_" + index + ".txt");
         }
-        return filename;
+
+        return logFileName + "_" + index + ".txt";  // return the unique filename
     }
 
-    // method to log a message to the unique file
-    public static void log(String message) {
-        // get the unique filename for the current run
-        String filename = getUniqueFilename();
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
 
-        // try-with-resources to handle file writing
-        try (FileWriter writer = new FileWriter(filename, true)) {
-            writer.write(message + "\n"); 
-        } catch (IOException e) {
-            System.err.println("Error writing to file: " + e.getMessage());
+    public static void initLogFile(){
+        try{
+            // get a unique log file name
+            currentLogFile = getUniqueLogFileName();
+            logWriter = new PrintWriter(new FileWriter(currentLogFile, true)); // open in append mode
+            logWriter.println("Program started.");
+        } catch (IOException e){
+            System.err.println("Error: Initialization failed.");
+        }
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static void closeLogFile() {
+        if (logWriter != null) {
+            logWriter.close(); // close the file writer when done
+        }
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static void logCorrectAnswer(String question, int answer) {
+        if (logWriter != null) {
+            logWriter.println("Correct Answer: " + question + " Your Answer: " + answer);
+            logWriter.flush();
+        }
+    }
+
+    // ***************************************************************
+    //
+    // Method:      
+    //
+    // Description: 
+    //
+    // Parameters:  
+    //
+    // Returns:     
+    //
+    // **************************************************************
+
+    public static void logIncorrectAnswer(String question, int answer) {
+        if (logWriter != null) {
+            logWriter.println("Incorrect Answer: " + question + " Your Answer: " + answer);
+            logWriter.flush();
         }
     }
 }
+
