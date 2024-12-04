@@ -92,9 +92,9 @@ public class Program7 {
         Logger.initLogFile();
         int level = 1; // always start at the basic level
         while (level > 0 && level <= 3) {
-            level = playLevel(level); // play the current level and return the next level (or 0 if exit)
+            level = playLevel(level); // play the current level and return the next level (or 0 to exit)
         }
-        System.out.println("\nGame over.Have a day or whatever.");
+        System.out.println("\n** GAME OVER **");
     }
 
     // ***************************************************************
@@ -107,61 +107,188 @@ public class Program7 {
     //
     // Returns:
     //
-    // **************************************************************
+    // **************************************************************     
 
     public static int playLevel(int level) {
         int correctAnswersInRow = 0;
         int totalQuestions = 0;
-
-        while (true) { // Keep asking questions until the user decides to exit
+        int previousLevel = level; // Track the previous level
+        
+        while (true) {
             totalQuestions++;
-            String question = QuestionGenerator.generateQuestion(level);
-            System.out.println("\nQuestion: " + question);
+            String question = generateAndAskQuestion(level);  // Get the question for the current level
             int correctAnswer = QuestionGenerator.evaluateQuestion(question);
-
-            boolean correct = false; // Flag to track if the answer is correct
-            while (!correct) {
-                System.out.print(">>> ");
-                int studentAnswer = getAnswer();
-
-                if (studentAnswer == correctAnswer) {
-                    Logger.logCorrectAnswer(question, studentAnswer);
-                    ResponseHandler.printCorrectResponse();
-                    correctAnswersInRow++;
-                    System.out.println("Correct answers in a row: " + correctAnswersInRow);
-                    correct = true; // Correct answer, exit the inner loop
-
-                    if (correctAnswersInRow >= 2) {
-                        int choice = askLevelChoice(level); // Get user's choice
-                        if (choice == level) {
-                            // Stay at the same level
-                            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                            System.out.println("Continuing at *** Level " + level + " ***");
-                            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-                        } else if (choice == level + 1) {
-                            // Move to the next level
-                            level = choice; // Set to the next level
-                            correctAnswersInRow = 0; // Reset streak for the new level
-                            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                            System.out.println("Moving to *** Level " + level + " ***");
-                            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-                        } else if (choice == 0) {
-                            // Exit the program
-                            return choice; // Exit the method
-                        }
-                    }
-                } else {
-                    Logger.logIncorrectAnswer(question, studentAnswer);
-                    ResponseHandler.printIncorrectResponse();
-                    correctAnswersInRow = 0; // Reset streak if the answer is incorrect
-                    System.out.println("Question: " + question); // Show the same question again
+    
+            boolean correct = handleStudentAnswer(question, correctAnswer);
+    
+            if (correct) {
+                correctAnswersInRow++;
+                handleCorrectAnswer(level, correctAnswersInRow);
+            } else {
+                correctAnswersInRow = 0;  // Reset streak on wrong answer
+                updateTotalQuestions(level, 1);  // Still increment total questions for incorrect answer
+            }
+    
+            if (shouldProgressLevel(correctAnswersInRow)) {
+                level = handleLevelProgression(correctAnswersInRow, level);
+                if (level == 0) {
+                    return 0;  // Exit game
                 }
+                correctAnswersInRow = resetStreakIfNeeded(level, previousLevel, correctAnswersInRow);
+                previousLevel = level;  // Update previous level to current level
             }
         }
     }
 
+    // ***************************************************************
+    //
+    // Method:
+    //
+    // Description:
+    //
+    // Parameters:
+    //
+    // Returns:
+    //
+    // **************************************************************  
+    
+    private static boolean handleStudentAnswer(String question, int correctAnswer) {
+        boolean correct = false;
+        while (!correct) {
+            System.out.print(">>> ");
+            int studentAnswer = getAnswer();  // Get the student's answer
+            correct = handleAnswer(studentAnswer, correctAnswer, question);  // Check if correct
+        }
+        return correct;
+    }
+
+    // ***************************************************************
+    //
+    // Method:
+    //
+    // Description:
+    //
+    // Parameters:
+    //
+    // Returns:
+    //
+    // **************************************************************  
+    
+    private static void handleCorrectAnswer(int level, int correctAnswersInRow) {
+        System.out.println("Correct answers in a row: " + correctAnswersInRow);
+        updateCorrectAnswers(level, 1);  // Update correct answers count
+        updateTotalQuestions(level, 1);  // Update total questions count
+    }
+
+    // ***************************************************************
+    //
+    // Method:
+    //
+    // Description:
+    //
+    // Parameters:
+    //
+    // Returns:
+    //
+    // **************************************************************  
+    
+    private static boolean shouldProgressLevel(int correctAnswersInRow) {
+        return correctAnswersInRow >= 2;  // Only check progression after answering 2 correct questions
+    }
+
+    // ***************************************************************
+    //
+    // Method:
+    //
+    // Description:
+    //
+    // Parameters:
+    //
+    // Returns:
+    //
+    // **************************************************************  
+    
+    private static int resetStreakIfNeeded(int level, int previousLevel, int correctAnswersInRow) {
+        // Reset streak if level has changed
+        return (level != previousLevel) ? 0 : correctAnswersInRow;
+    }
+    
+    // ***************************************************************
+    //
+    // Method:
+    //
+    // Description:
+    //
+    // Parameters:
+    //
+    // Returns:
+    //
+    // **************************************************************  
+    
+    private static String generateAndAskQuestion(int level) {
+        String question = QuestionGenerator.generateQuestion(level);
+        System.out.println("\nQuestion: " + question);
+        return question;
+    }
+        // ***************************************************************
+    //
+    // Method:
+    //
+    // Description:
+    //
+    // Parameters:
+    //
+    // Returns:
+    //
+    // **************************************************************  
+
+    private static boolean handleAnswer(int studentAnswer, int correctAnswer, String question) {
+        boolean isCorrect;
+
+        if (studentAnswer == correctAnswer) {
+            Logger.logCorrectAnswer(question, studentAnswer);
+            ResponseHandler.printCorrectResponse();
+            isCorrect = true;
+        } else {
+            Logger.logIncorrectAnswer(question, studentAnswer);
+            ResponseHandler.printIncorrectResponse();
+            System.out.println("Question: " + question);
+            isCorrect = false;
+        }
+        return isCorrect; 
+    }
+
+    // ***************************************************************
+    //
+    // Method:
+    //
+    // Description:
+    //
+    // Parameters:
+    //
+    // Returns:
+    //
+    // **************************************************************  
+
+    private static int handleLevelProgression(int correctAnswersInRow, int level) {
+        if (correctAnswersInRow >= 2) {
+            int choice = askLevelChoice(level);
+            if (choice == level) {
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("Continuing at *** Level " + level + " ***");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            } else if (choice == level + 1) {
+                level = choice; // Update level here when moving up
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("Moving to *** Level " + level + " ***");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            } else if (choice == 0) {
+                return 0; // Exit the program
+            }
+        }
+        return level; // Return updated level or the same level
+    }
+    
     // ***************************************************************
     //
     // Method:
@@ -236,16 +363,16 @@ public class Program7 {
     //
     // **************************************************************
 
-    public static int askLevelChoice(int level) {
+    public static int askLevelChoice(int level) { 
+
         while (true) {
             if (level == 3) {
                 System.out.println("You have reached the most advanced level. Keep up the good work. Press (1) to continue or (0) to exit.");
             } else {
                 System.out.println("\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
             }
-    
             int choice = getAnswer(); // get user input
-    
+
             switch (choice) {
                 case 1:
                     return level; // stay at the current level
@@ -257,47 +384,14 @@ public class Program7 {
                         return level; // max level reached
                     }
                 case 0:
-                    System.out.println("\nRESULT SUMMARY: ");
-                    System.out.println("---------------------------------");
-                    showSummary();
+                    showSummary(); 
+                    Logger.closeLogFile();
                     return 0; // exit the program
                 default:
-                    System.out.println("Invalid choice. Please enter 0, 1, or 2.");
+                    System.out.println("Invalid entry. Please enter an option from above.");
             }
         }
     }
-    
-
-    // public static int askLevelChoice(int level) {
-    //     while (true) {
-    //         if (level == 3) {
-    //             System.out.println("You have reached the most advanced level. Keep up the good work. Press (1) to continue or (0) to exit.");
-    //             int choice = getAnswer();
-    //             return choice;
-    //         } else {
-    //             System.out.println("\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
-    //             int choice = getAnswer(); // get user input
-    //             if (choice == 1 || choice == 2 || choice == 0) {
-    //                 if (choice == 1) {
-    //                     return level; // stay at the current level
-    //                 } else if (choice == 2) {
-    //                     if (level == 3) {
-    //                         return level; // max level reached
-    //                     } else {
-    //                         return level + 1; // move to the next level
-    //                     }
-    //                 } else {
-    //                     System.out.println("\nRESULT SUMMARY: ");
-    //                     System.out.println("---------------------------------");
-    //                     showSummary();
-    //                     return 0; // Exit the program
-    //                 }
-    //             } else {
-    //                 System.out.println("Invalid choice. Please enter 0, 1, or 2.");
-    //             }
-    //         }
-    //     }
-    // }
 
     // ***************************************************************
     //
@@ -312,7 +406,8 @@ public class Program7 {
     // **************************************************************
 
     public static void showSummary() {
-        System.out.println("Summary of your performance:");
+        System.out.println("\nPERFORMANCE SUMMARY: ");
+        System.out.println("---------------------------------");
         System.out.println("Basic Level: " + correctBasic + "/" + totalQuestionsBasic + " ("
                 + getPercentage(correctBasic, totalQuestionsBasic) + "% correct)");
         System.out.println("Intermediate Level: " + correctIntermediate + "/" + totalQuestionsIntermediate + " ("
@@ -337,20 +432,116 @@ public class Program7 {
     //
     // **************************************************************
 
-    public static double getPercentage(int correct, int total) {
-        return total == 0 ? 0.0 : ((double) correct / total) * 100;
+    public static int getPercentage(int correct, int total) {
+        if (total == 0) return 0; // avoid division by zero
+        return (int) ((correct * 100.0) / total);
     }
-
-    // ***************************************************************
-    //
-    // Method:
-    //
-    // Description:
-    //
-    // Parameters:
-    //
-    // Returns:
-    //
-    // **************************************************************
-
 }
+
+
+
+
+// public static int playLevel(int level) {
+    //     int correctAnswersInRow = 0;
+    //     int totalQuestions = 0;
+    
+    //     while (true) {
+    //         totalQuestions++;
+    //         String question = generateAndAskQuestion(level);  // Get the question for the current level
+    //         int correctAnswer = QuestionGenerator.evaluateQuestion(question);
+    
+    //         boolean correct = false;
+    //         while (!correct) {
+    //             System.out.print(">>> ");
+    //             int studentAnswer = getAnswer();  // Get the student's answer
+    
+    //             correct = handleAnswer(studentAnswer, correctAnswer, question);
+    //             if (correct) {
+    //                 correctAnswersInRow++;  // Increment correct answers streak
+    //                 System.out.println("Correct answers in a row: " + correctAnswersInRow);
+    //                 updateCorrectAnswers(level, 1);  // Update correct answers count
+    //                 updateTotalQuestions(level, 1);  // Update total questions count
+    
+    //                 // Only check progression after answering 2 correct questions
+    //                 if (correctAnswersInRow >= 2) {
+    //                     int previousLevel = level;  // Track the current level before progression
+    //                     level = handleLevelProgression(correctAnswersInRow, level);
+    //                     if (level == 0) {
+    //                         return 0;  // Exit the game if level 0 is chosen
+    //                     }
+    
+    //                     // Only reset the streak if the level has actually changed
+    //                     if (level != previousLevel) {
+    //                         correctAnswersInRow = 0;  // Reset streak only if level has changed
+    //                     }
+    //                 }
+    //             } else {
+    //                 correctAnswersInRow = 0;  // Reset streak if incorrect answer
+    //                 updateTotalQuestions(level, 1);  // Increment total questions count even for incorrect answers
+    //             }
+    //         }
+    //     }
+    // }
+
+
+
+
+
+ // public static int playLevel(int level) {
+    //     int correctAnswersInRow = 0;
+    //     int totalQuestions = 0;
+
+    //     while (true) { // keep asking questions until the user decides to exit
+    //         totalQuestions++;
+    //         String question = QuestionGenerator.generateQuestion(level);
+    //         System.out.println("\nQuestion: " + question);
+    //         int correctAnswer = QuestionGenerator.evaluateQuestion(question);
+
+    //         boolean correct = false; // flag to track if the answer is correct
+    //         while (!correct) {
+    //             System.out.print(">>> ");
+    //             int studentAnswer = getAnswer();
+
+    //             if (studentAnswer == correctAnswer) {
+    //                 Logger.logCorrectAnswer(question, studentAnswer); // log correct response
+    //                 ResponseHandler.printCorrectResponse();
+    //                 correctAnswersInRow++;
+    //                 System.out.println("Correct answers in a row: " + correctAnswersInRow);
+    //                 correct = true; // correct answer, exit the inner loop
+
+    //                 // update counters for correct answers and total questions
+    //                 updateCorrectAnswers(level, 1); // increment correct answer count
+    //                 updateTotalQuestions(level, 1); // increment total questions count
+
+    //                 if (correctAnswersInRow >= 2) {
+    //                     int choice = askLevelChoice(level); // get user's choice
+    //                     if (choice == level) {
+    //                         // stay at the same level
+    //                         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    //                         System.out.println("Continuing at *** Level " + level + " ***");
+    //                         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+    //                     } else if (choice == level + 1) {
+    //                         // m+ove to the next level
+    //                         level = choice; // set to the next level
+    //                         correctAnswersInRow = 0; // reset streak for the new level
+    //                         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    //                         System.out.println("Moving to *** Level " + level + " ***");
+    //                         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+    //                     } else if (choice == 0) {
+    //                         return choice; // exit the program
+    //                     }
+    //                 }
+    //             } else {
+    //                 Logger.logIncorrectAnswer(question, studentAnswer); // log incorrect response
+    //                 ResponseHandler.printIncorrectResponse();
+    //                 correctAnswersInRow = 0; // reset streak if the answer is incorrect
+    //                 System.out.println("Question: " + question); // show the same question again
+
+    //                 // update total questions count even on incorrect answers
+    //                 updateTotalQuestions(level, 1); // increment total questions count
+    //             }
+    //         }
+    //     }
+    // }
