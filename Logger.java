@@ -4,7 +4,7 @@
 //
 //  Program #:     7
 //
-//  File Name:     
+//  File Name:     Logger.java
 //
 //  Course:        COSC 4301 Modern Programming
 //
@@ -14,10 +14,11 @@
 //
 //  Java Version:  "17.0.1" 2021-10-19 LTS
 //
-//  Description:   
+//  Description:   This class manages logging for the program, creating unique log files 
+//                 and recording both correct and incorrect answers to questions.
+//                 It also ensures proper file handling and prevents overwriting existing logs.
 //
 //********************************************************************
-
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,23 +28,24 @@ import java.io.PrintWriter;
 public class Logger {
 
     public static PrintWriter logWriter;
-    public static String logFileName = "Program7-Output"; 
-    public static String currentLogFile; // current log file with index
+    public String logFileName = "Program7-Output"; 
+    public String currentLogFile; // current log file with index
 
     // ***************************************************************
     //
-    // Method:      
+    // Method:      getUniqueLogFileName
     //
-    // Description: 
+    // Description: Generates a unique file name for the log file by appending an index to 
+    //              the base name. Ensures no existing file is overwritten.
     //
-    // Parameters:  
+    // Parameters:  None
     //
-    // Returns:     
+    // Returns:     A String representing the unique log file name.
     //
     // **************************************************************
 
-    public static String getUniqueLogFileName() {
-        int index = 1;  // Start with 1
+    public String getUniqueLogFileName() {
+        int index = 1;  // start with 1
         File file = new File(logFileName + "_" + index + ".txt");
         
         // increment the index until a unique filename is found
@@ -57,17 +59,18 @@ public class Logger {
 
     // ***************************************************************
     //
-    // Method:      
+    // Method:      initLogFile
     //
-    // Description: 
+    // Description: Initializes the log file by creating a unique file name and opening a 
+    //              PrintWriter in append mode. Writes an initial message indicating the program has started.
     //
-    // Parameters:  
+    // Parameters:  None
     //
-    // Returns:     
+    // Returns:     None
     //
     // **************************************************************
 
-    public static void initLogFile(){
+    public void initLogFile(){
         try{
             // get a unique log file name
             currentLogFile = getUniqueLogFileName();
@@ -80,13 +83,14 @@ public class Logger {
 
     // ***************************************************************
     //
-    // Method:      
+    // Method:      closeLogFile
     //
-    // Description: 
+    // Description: Closes the log file if it is open, ensuring all pending data is written 
+    //              and resources are released properly.
     //
-    // Parameters:  
+    // Parameters:  None
     //
-    // Returns:     
+    // Returns:     None
     //
     // **************************************************************
 
@@ -98,13 +102,15 @@ public class Logger {
 
     // ***************************************************************
     //
-    // Method:      
+    // Method:      logCorrectAnswer
     //
-    // Description: 
+    // Description: Logs a correctly answered question and the user's answer to the log file. 
+    //              Appends the information with formatting for clarity.
     //
-    // Parameters:  
+    // Parameters:  question - A String representing the question.
+    //              answer - An integer representing the correct answer provided by the user.
     //
-    // Returns:     
+    // Returns:     None
     //
     // **************************************************************
 
@@ -112,20 +118,22 @@ public class Logger {
         if (logWriter != null) {
             logWriter.println("Question: " + question);
             logWriter.println("Your Correct Answer: " + answer);
-            logWriter.println("-----------------------------------");;
+            logWriter.println("-----------------------------------");
             logWriter.flush();
         }
     }
 
     // ***************************************************************
     //
-    // Method:      
+    // Method:      logIncorrectAnswer
     //
-    // Description: 
+    // Description: Logs an incorrectly answered question and the user's answer to the log file. 
+    //              Appends the information with formatting for clarity.
     //
-    // Parameters:  
+    // Parameters:  question - A String representing the question.
+    //              answer - An integer representing the incorrect answer provided by the user.
     //
-    // Returns:     
+    // Returns:     None
     //
     // **************************************************************
 
@@ -133,9 +141,8 @@ public class Logger {
         if (logWriter != null) {
             logWriter.println("Question: " + question);
             logWriter.println("Your Incorrect Answer: " + answer);
-            logWriter.println("-----------------------------------");;
+            logWriter.println("-----------------------------------");
             logWriter.flush();
         }
     }
 }
-
