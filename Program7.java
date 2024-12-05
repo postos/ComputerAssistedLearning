@@ -30,13 +30,14 @@ import java.util.Scanner;
 public class Program7 {
 
     private Scanner scanner = new Scanner(System.in);
+    private Logger logger = new Logger(); 
     private int correctBasic = 0;
     private int totalQuestionsBasic = 0;
     private int correctIntermediate = 0;
     private int totalQuestionsIntermediate = 0;
     private int correctAdvanced = 0;
     private int totalQuestionsAdvanced = 0;
-    private int level = 1; 
+    private int level = 1; // always start at basic level 
 
     // ***************************************************************
     //
@@ -93,7 +94,6 @@ public class Program7 {
     // ***************************************************************
 
     public void initiateLearning() {
-        Logger logger = new Logger();
         logger.initLogFile();
         
         while (level > 0 && level <= 3) {
@@ -233,14 +233,15 @@ public class Program7 {
 
     public boolean handleAnswer(int studentAnswer, int correctAnswer, String question) {
         boolean isCorrect;
+        Logger logger = new Logger(); 
         ResponseHandler responseHandler = new ResponseHandler();
 
         if (studentAnswer == correctAnswer) {
-            Logger.logCorrectAnswer(question, studentAnswer);
+            logger.logCorrectAnswer(question, studentAnswer);
             responseHandler.printCorrectResponse();
             isCorrect = true;
         } else {
-            Logger.logIncorrectAnswer(question, studentAnswer);
+            logger.logIncorrectAnswer(question, studentAnswer);
             responseHandler.printIncorrectResponse();
             System.out.println("Question: " + question);
             isCorrect = false;
@@ -370,10 +371,9 @@ public class Program7 {
     // ***************************************************************
 
     public int manageLevel() {
-        boolean continueLoop = true;
-        while (continueLoop) {
+        while (true) {
             if (level == 3) {
-                System.out.println("You have reached the most advanced level. Keep up the good work. Press (1) to continue or (0) to exit.");
+                System.out.println("You have reached the most advanced level. Keep up the good work. Press (1 or 2) to continue or (0) to exit.");
             } else {
                 System.out.println("\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
             }
@@ -382,21 +382,15 @@ public class Program7 {
                 case 1:
                     return level; // stay at the current level
                 case 2:
-                    if (level < 3) {
-                        return level + 1; // move to the next level
-                    } else {
-                        System.out.println("Continuing at level 3.");
-                        return level; // max level reached
-                    }
+                    return (level < 3) ? level + 1 : level; // Move to the next level or stay at level 3
                 case 0:
                     showSummary();
-                    Logger.closeLogFile();
-                    continueLoop = false; // exit the loop and return 0 to quit
+                    logger.closeLogFile();
+                    return 0; // exit the loop and return 0 to quit
                 default:
-                    System.out.println("Invalid entry. Please enter an option from above.");
+                    System.out.println("Please enter a valid option.");
             }
         }
-        return 0; // exit the program
     }
 
     // ***************************************************************
