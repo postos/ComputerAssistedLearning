@@ -14,7 +14,10 @@
 //
 //  Java Version:  "17.0.1" 2021-10-19 LTS
 //
-//  Description:   
+//  Description:    This program is a learning game with three difficulty levels. 
+//                  It tracks the player's correct answers, manages level progression, 
+//                  and provides a performance summary. The game advises the player 
+//                  to seek help if their performance is below 80% on the basic level.
 //
 //********************************************************************
 
@@ -26,13 +29,14 @@ import java.util.Scanner;
 
 public class Program7 {
 
-    public Scanner scanner = new Scanner(System.in);
-    public int correctBasic = 0;
-    public int totalQuestionsBasic = 0;
-    public int correctIntermediate = 0;
-    public int totalQuestionsIntermediate = 0;
-    public int correctAdvanced = 0;
-    public int totalQuestionsAdvanced = 0;
+    private Scanner scanner = new Scanner(System.in);
+    private int correctBasic = 0;
+    private int totalQuestionsBasic = 0;
+    private int correctIntermediate = 0;
+    private int totalQuestionsIntermediate = 0;
+    private int correctAdvanced = 0;
+    private int totalQuestionsAdvanced = 0;
+    private int level = 1; 
 
     // ***************************************************************
     //
@@ -91,10 +95,9 @@ public class Program7 {
     public void initiateLearning() {
         Logger logger = new Logger();
         logger.initLogFile();
-
-        int level = 1; // always start at the basic level
+        
         while (level > 0 && level <= 3) {
-            level = playLevel(level); // play the current level and return the next level (or 0 to exit)
+            level = playLevel(); // play the current level and return the next level (or 0 to exit)
         }
         System.out.println("\n** GAME OVER **");
     }
@@ -112,45 +115,89 @@ public class Program7 {
     //
     // ***************************************************************
 
-    public int playLevel(int level) {
+    public int playLevel() {
         int correctAnswersInRow = 0;
-        int totalQuestions = 0; // track total number of questions asked (across all levels)
-        int previousLevel = level; // track the previous level
         boolean gameRunning = true;
-
+    
         while (gameRunning) {
-            String question = generateAndAskQuestion(level);
-            int correctAnswer = QuestionGenerator.evaluateQuestion(question);
-            totalQuestions++;
-            boolean correct = false; // flag to track whether the answer is correct
+            String question = generateAndAskQuestion(); // generate and display a question
+            int correctAnswer = QuestionGenerator.evaluateQuestion(question); // get correct answer for the question
+            boolean gotCorrectOnFirstTry = processStudentAnswers(correctAnswer, question);
+    
+            if (gotCorrectOnFirstTry) {
+                correctAnswersInRow++;
+                System.out.println("Correct Answer Streak: " + correctAnswersInRow);
+                
+                updateCorrectAnswers(1); // update counter
+                updateTotalQuestions(1); // update counter
 
-            while (!correct) {
-                System.out.print(">>> ");
-                int studentAnswer = getAnswer(); // get the student's answer
-                correct = handleAnswer(studentAnswer, correctAnswer, question); // check answer
-
-                if (correct) {
-                    correctAnswersInRow++; // increment streak for correct answers
-                    System.out.println("Correct Answer Streak: " + correctAnswersInRow);
-                    updateCorrectAnswers(level, 1); // update correct answers count for this level
-                    updateTotalQuestions(level, 1); // update total questions count for this level
-
-                    if (correctAnswersInRow >= 2) {
-                        int previousLevelTemp = level; // store previous level for comparison
-                        level = handleLevelProgression(correctAnswersInRow, level);
-                        if (level == 0)
-                            gameRunning = false; // exit loop, quit game
-                        if (level != previousLevelTemp)
-                            correctAnswersInRow = 0; // reset the streak if the level has changed
-                        previousLevel = level; // update the previous level
-                    }
-                } else {
-                    correctAnswersInRow = 0; // reset streak
-                    updateTotalQuestions(level, 1); // increment total questions count even for incorrect answers
+                int previousLevel = level; // track current level before checking progression
+                gameRunning = handleStreak(correctAnswersInRow);
+    
+                if (level != previousLevel) {
+                    correctAnswersInRow = 0; // reset streak on level change
                 }
+            } else {
+                correctAnswersInRow = 1; // restart streak with the first correct answer after an incorrect attempt
+                System.out.println("Correct Answer Streak: " + correctAnswersInRow);
             }
         }
-        return 0;
+        return 0; // exit game
+    }
+    
+    // ***************************************************************
+    // 
+    // Method:      processStudentAnswers
+    // 
+    // Description: Handles the process of checking the student's answer and tracks if it was correct on the first attempt.
+    // 
+    // Parameters:  int correctAnswer, String question
+    // 
+    // Returns:     boolean - true if correct on first attempt, false otherwise
+    // 
+    // ***************************************************************
+    
+    private boolean processStudentAnswers(int correctAnswer, String question) {
+        boolean correct = false;
+        boolean firstAttempt = true; // Tracks if this is the student's first attempt
+    
+        while (!correct) {
+            System.out.print(">>> ");
+            int studentAnswer = getAnswer(); // Get the student's answer
+            correct = handleAnswer(studentAnswer, correctAnswer, question); // Check if it's correct
+            updateTotalQuestions(1); // Update total questions count
+    
+            if (!correct && firstAttempt) {
+                firstAttempt = false; // Mark first attempt as failed
+            }
+        }
+        return firstAttempt; // Return true if correct on first attempt, false otherwise
+    }
+    
+    // ***************************************************************
+    // 
+    // Method:      handleStreak
+    // 
+    // Description: Checks if the streak of correct answers triggers a level progression.
+    // 
+    // Parameters:  int correctAnswersInRow
+    // 
+    // Returns:     boolean - false if game ends, true if the game continues
+    // 
+    // ***************************************************************
+    
+    private boolean handleStreak(int correctAnswersInRow) {
+        if (correctAnswersInRow >= 2) {
+            int previousLevel = level;
+            level = handleLevelProgression(correctAnswersInRow); // Update the level
+            if (level == 0) {
+                return false; // Game ends
+            }
+            if (level != previousLevel) {
+                return true; // Continue game with the new level
+            }
+        }
+        return true; // Continue game if no level change occurred
     }
 
     // ***************************************************************
@@ -166,11 +213,12 @@ public class Program7 {
     //
     // ***************************************************************
 
-    public String generateAndAskQuestion(int level) {
+    public String generateAndAskQuestion() {
         String question = QuestionGenerator.generateQuestion(level);
         System.out.println("\nQuestion: " + question);
         return question;
     }
+    
     // ***************************************************************
     //
     // Method:      handleAnswer
@@ -219,9 +267,9 @@ public class Program7 {
     //
     // ***************************************************************
 
-    public int handleLevelProgression(int correctAnswersInRow, int level) {
+    public int handleLevelProgression(int correctAnswersInRow) {
         if (correctAnswersInRow >= 2) {
-            int choice = manageLevel(level);
+            int choice = manageLevel();
             if (choice == level) {
                 System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 System.out.println("Continuing at *** Level " + level + " ***");
@@ -253,6 +301,7 @@ public class Program7 {
     // ***************************************************************
 
     public int getAnswer() {
+        // if an integer is not entered
         while (!scanner.hasNextInt()) {
             System.out.println("Please enter a valid integer.");
             scanner.next(); // consume the invalid input
@@ -275,7 +324,7 @@ public class Program7 {
     //
     // ***************************************************************
 
-    public void updateCorrectAnswers(int level, int correctAnswers) {
+    public void updateCorrectAnswers(int correctAnswers) {
         if (level == 1)
             correctBasic += correctAnswers;
         else if (level == 2)
@@ -299,7 +348,7 @@ public class Program7 {
     //
     // ***************************************************************
 
-    public void updateTotalQuestions(int level, int totalQuestions) {
+    public void updateTotalQuestions(int totalQuestions) {
         if (level == 1)
             totalQuestionsBasic += totalQuestions;
         else if (level == 2)
@@ -323,7 +372,7 @@ public class Program7 {
     //
     // ***************************************************************
 
-    public int manageLevel(int level) {
+    public int manageLevel() {
         while (true) {
             if (level == 3) {
                 System.out.println(
