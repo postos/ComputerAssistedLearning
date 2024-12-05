@@ -159,19 +159,19 @@ public class Program7 {
     
     private boolean processStudentAnswers(int correctAnswer, String question) {
         boolean correct = false;
-        boolean firstAttempt = true; // Tracks if this is the student's first attempt
+        boolean firstAttempt = true; // tracks if this is the student's first attempt
     
         while (!correct) {
             System.out.print(">>> ");
-            int studentAnswer = getAnswer(); // Get the student's answer
-            correct = handleAnswer(studentAnswer, correctAnswer, question); // Check if it's correct
-            updateTotalQuestions(1); // Update total questions count
+            int studentAnswer = getAnswer(); // get the student's answer
+            correct = handleAnswer(studentAnswer, correctAnswer, question); // check if it's correct
+            updateTotalQuestions(1); // update total questions count
     
             if (!correct && firstAttempt) {
-                firstAttempt = false; // Mark first attempt as failed
+                firstAttempt = false; // mark first attempt as failed
             }
         }
-        return firstAttempt; // Return true if correct on first attempt, false otherwise
+        return firstAttempt; // return true if correct on first attempt, false otherwise
     }
     
     // ***************************************************************
@@ -187,17 +187,14 @@ public class Program7 {
     // ***************************************************************
     
     private boolean handleStreak(int correctAnswersInRow) {
+        boolean resumeGame = true;
         if (correctAnswersInRow >= 2) {
-            int previousLevel = level;
-            level = handleLevelProgression(correctAnswersInRow); // Update the level
+            level = handleLevelProgression(correctAnswersInRow); // update the level
             if (level == 0) {
-                return false; // Game ends
-            }
-            if (level != previousLevel) {
-                return true; // Continue game with the new level
+                resumeGame = false; // game ends
             }
         }
-        return true; // Continue game if no level change occurred
+        return resumeGame; // continue game if no level change occurred
     }
 
     // ***************************************************************
@@ -218,7 +215,7 @@ public class Program7 {
         System.out.println("\nQuestion: " + question);
         return question;
     }
-    
+
     // ***************************************************************
     //
     // Method:      handleAnswer
