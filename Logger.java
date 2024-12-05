@@ -27,9 +27,7 @@ import java.io.PrintWriter;
 
 public class Logger {
 
-    private static PrintWriter logWriter;
-    private String logFileName = "Program7-Output"; 
-    private String currentLogFile; // current log file with index
+    private PrintWriter logWriter;
 
     // ***************************************************************
     //
@@ -45,6 +43,8 @@ public class Logger {
     // **************************************************************
 
     public String getUniqueLogFileName() {
+        String logFileName = "Program7-Output"; 
+
         int index = 1;  // start with 1
         File file = new File(logFileName + "_" + index + ".txt");
         
@@ -71,6 +71,7 @@ public class Logger {
     // **************************************************************
 
     public void initLogFile(){
+        String currentLogFile; // current log file with index
         try{
             // get a unique log file name
             currentLogFile = getUniqueLogFileName();
@@ -94,7 +95,7 @@ public class Logger {
     //
     // **************************************************************
 
-    public static void closeLogFile() {
+    public void closeLogFile() {
         if (logWriter != null) {
             logWriter.close(); // close the file writer when done
         }
@@ -114,7 +115,7 @@ public class Logger {
     //
     // **************************************************************
 
-    public static void logCorrectAnswer(String question, int answer) {
+    public void logCorrectAnswer(String question, int answer) {
         if (logWriter != null) {
             logWriter.println("Question: " + question);
             logWriter.println("Your Correct Answer: " + answer);
@@ -137,7 +138,7 @@ public class Logger {
     //
     // **************************************************************
 
-    public static void logIncorrectAnswer(String question, int answer) {
+    public void logIncorrectAnswer(String question, int answer) {
         if (logWriter != null) {
             logWriter.println("Question: " + question);
             logWriter.println("Your Incorrect Answer: " + answer);
