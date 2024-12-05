@@ -126,7 +126,7 @@ public class Program7 {
     
             if (gotCorrectOnFirstTry) {
                 correctAnswersInRow++;
-                System.out.println("Correct Answer Streak: " + correctAnswersInRow);
+                System.out.println("Level " + level + " Streak: " + correctAnswersInRow);
                 
                 updateCorrectAnswers(1); // update counter
                 updateTotalQuestions(1); // update counter
@@ -139,7 +139,7 @@ public class Program7 {
                 }
             } else {
                 correctAnswersInRow = 1; // restart streak with the first correct answer after an incorrect attempt
-                System.out.println("Correct Answer Streak: " + correctAnswersInRow);
+                System.out.println("Level " + level + " Streak: " + correctAnswersInRow);
             }
         }
         return 0; // exit game
@@ -370,13 +370,12 @@ public class Program7 {
     // ***************************************************************
 
     public int manageLevel() {
-        while (true) {
+        boolean continueLoop = true;
+        while (continueLoop) {
             if (level == 3) {
-                System.out.println(
-                        "You have reached the most advanced level. Keep up the good work. Press (1) to continue or (0) to exit.");
+                System.out.println("You have reached the most advanced level. Keep up the good work. Press (1) to continue or (0) to exit.");
             } else {
-                System.out.println(
-                        "\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
+                System.out.println("\nDo you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
             }
             int choice = getAnswer(); // get user input
             switch (choice) {
@@ -386,17 +385,18 @@ public class Program7 {
                     if (level < 3) {
                         return level + 1; // move to the next level
                     } else {
-                        System.out.println("You are already at the most advanced level.");
+                        System.out.println("Continuing at level 3.");
                         return level; // max level reached
                     }
                 case 0:
                     showSummary();
                     Logger.closeLogFile();
-                    return 0; // exit the program
+                    continueLoop = false; // exit the loop and return 0 to quit
                 default:
                     System.out.println("Invalid entry. Please enter an option from above.");
             }
         }
+        return 0; // exit the program
     }
 
     // ***************************************************************
