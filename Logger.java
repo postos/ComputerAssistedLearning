@@ -27,9 +27,9 @@ import java.io.PrintWriter;
 
 public class Logger {
 
-    public static PrintWriter logWriter;
-    public String logFileName = "Program7-Output"; 
-    public String currentLogFile; // current log file with index
+    private static PrintWriter logWriter;
+    private String logFileName = "Program7-Output"; 
+    private String currentLogFile; // current log file with index
 
     // ***************************************************************
     //
