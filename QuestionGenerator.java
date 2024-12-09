@@ -20,6 +20,11 @@
 //
 //********************************************************************
 
+// Professor Kumi, the methods and variables in this class are static because they don't rely on any instance-specific data. 
+// I wanted to be able to call them directly from the class without needing to create an object each time. The `SecureRandom` 
+// instance is static too, so we don’t have to create a new one every time we generate a question, making it more efficient. 
+// Keeping everything static makes the code simpler and easier to use across different parts of Program7.
+
 import java.security.SecureRandom;
 import java.util.Stack;
 
@@ -53,8 +58,7 @@ public class QuestionGenerator {
                 question.append(getRandomOperator()); // add random operator
                 question.append(" ");
             }
-            question.append(random.nextInt(2) + 1); // generate random operand (1-9)
-            //question.append(random.nextInt(9) + 1); // generate random operand (1-9)
+            question.append(random.nextInt(9) + 1); // generate random operand (1-9)
         }
 
         return question.toString();
@@ -84,7 +88,7 @@ public class QuestionGenerator {
     // 
     // Description: Evaluates a mathematical question represented as a String. The question 
     //              consists of operands and operators separated by spaces. Supports operations with correct 
-    //              precedence and parentheses (if applicable).
+    //              precedence.
     // 
     // Parameters:  question - A String containing the mathematical question to evaluate.
     // 
@@ -120,7 +124,7 @@ public class QuestionGenerator {
             int num2 = numbers.pop(); // pop the top two numbers
             int num1 = numbers.pop();
             String op = operators.pop(); // pop the operator
-            numbers.push(applyOperator(num1, num2, op)); // compute and push the result
+            numbers.push(applyOperator(num1, num2, op)); // push the result
         }
         return numbers.pop(); // the final result is the last number in the stack
     }

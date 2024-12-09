@@ -23,7 +23,7 @@
 import java.util.Random;
 
 public class ResponseHandler {
-    private final Random random = new Random();
+    private Random random = new Random();
 
     // ***************************************************************
     //
