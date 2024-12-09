@@ -146,4 +146,30 @@ public class Logger {
             logWriter.flush();
         }
     }
+
+    // ***************************************************************
+    //
+    // Method:      logContinueResponse
+    //
+    // Description: Logs the students response when they are asked if they 
+    //              wish to continue.     
+    //
+    // Parameters:  int choice
+    //              int level
+    //
+    // Returns:     None
+    //
+    // **************************************************************
+
+    public void logContinueResponse(int choice, int level){
+        if (level == 3) {
+            logWriter.println("You have reached the most advanced level. Keep up the good work. Press (1 or 2) to continue or (0) to exit.");
+            logWriter.println("Choice: " + choice);
+            logWriter.println("-----------------------------------");
+        } else {
+            logWriter.println("Do you want to (1) Continue at this level, (2) Move to a more difficult level, (0) Exit?");
+            logWriter.println("Choice: " + choice);
+            logWriter.println("-----------------------------------");
+        }
+    }
 }
