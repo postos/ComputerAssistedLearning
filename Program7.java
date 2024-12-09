@@ -129,10 +129,9 @@ public class Program7 {
                 System.out.println("Level " + level + " Streak: " + correctAnswersInRow);
                 
                 updateCorrectAnswers(1); // update counter
-                updateTotalQuestions(1); // update counter
 
                 int previousLevel = level; // track current level before checking progression
-                gameRunning = handleStreak(correctAnswersInRow);
+                gameRunning = handleStreak(correctAnswersInRow); // returns true to keep playing/false to jump out of loop
     
                 if (level != previousLevel) {
                     correctAnswersInRow = 0; // reset streak on level change
@@ -142,7 +141,26 @@ public class Program7 {
                 System.out.println("Level " + level + " Streak: " + correctAnswersInRow);
             }
         }
-        return 0; // exit game
+        return 0; // exit game if gameRunning returns false
+    }
+
+    // ***************************************************************
+    //
+    // Method:      generateAndAskQuestion
+    //
+    // Description: Generates a question based on the current level,
+    //              prints it to the console, and returns the question string.
+    //
+    // Parameters:  int level - the current game level
+    //
+    // Returns:     String - the generated question
+    //
+    // ***************************************************************
+
+    public String generateAndAskQuestion() {
+        String question = QuestionGenerator.generateQuestion(level);
+        System.out.println("\nQuestion: " + question);
+        return question;
     }
     
     // ***************************************************************
@@ -173,48 +191,6 @@ public class Program7 {
         }
         return firstAttempt; // return true if correct on first attempt, false otherwise
     }
-    
-    // ***************************************************************
-    // 
-    // Method:      handleStreak
-    // 
-    // Description: Checks if the streak of correct answers triggers a level progression.
-    // 
-    // Parameters:  int correctAnswersInRow
-    // 
-    // Returns:     boolean - false if game ends, true if the game continues
-    // 
-    // ***************************************************************
-    
-    private boolean handleStreak(int correctAnswersInRow) {
-        boolean resumeGame = true;
-        if (correctAnswersInRow >= 2) {
-            level = handleLevelProgression(correctAnswersInRow); // update the level
-            if (level == 0) {
-                resumeGame = false; // game ends
-            }
-        }
-        return resumeGame; // continue game if no level change occurred
-    }
-
-    // ***************************************************************
-    //
-    // Method:      generateAndAskQuestion
-    //
-    // Description: Generates a question based on the current level,
-    //              prints it to the console, and returns the question string.
-    //
-    // Parameters:  int level - the current game level
-    //
-    // Returns:     String - the generated question
-    //
-    // ***************************************************************
-
-    public String generateAndAskQuestion() {
-        String question = QuestionGenerator.generateQuestion(level);
-        System.out.println("\nQuestion: " + question);
-        return question;
-    }
 
     // ***************************************************************
     //
@@ -233,7 +209,6 @@ public class Program7 {
 
     public boolean handleAnswer(int studentAnswer, int correctAnswer, String question) {
         boolean isCorrect;
-        Logger logger = new Logger(); 
         ResponseHandler responseHandler = new ResponseHandler();
 
         if (studentAnswer == correctAnswer) {
@@ -247,64 +222,6 @@ public class Program7 {
             isCorrect = false;
         }
         return isCorrect;
-    }
-
-    // ***************************************************************
-    //
-    // Method:      handleLevelProgression
-    //
-    // Description: Manages level progression based on the player's
-    //              performance. If the player answers enough questions
-    //              correctly in a row, they are given the option to
-    //              move to the next level or stay at the current level.
-    //
-    // Parameters:  int correctAnswersInRow - the number of consecutive correct answers
-    //              int level - the current level of the game
-    //
-    // Returns:     int - the updated level or 0 if the player chooses to exit
-    //
-    // ***************************************************************
-
-    public int handleLevelProgression(int correctAnswersInRow) {
-        if (correctAnswersInRow >= 2) {
-            int choice = manageLevel();
-            if (choice == level) {
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                System.out.println("Continuing at *** Level " + level + " ***");
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            } else if (choice == level + 1) {
-                level = choice; // update level here when moving up
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                System.out.println("Moving to *** Level " + level + " ***");
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            } else if (choice == 0) {
-                return 0; // Exit the program
-            }
-        }
-        return level; // Return updated level or the same level
-    }
-
-    // ***************************************************************
-    //
-    // Method:      getAnswer
-    //
-    // Description: Prompts the user to enter an integer as their answer,
-    //              and ensures the input is a valid integer. If invalid input
-    //              is provided, it requests the user to enter a valid number.
-    //
-    // Parameters:  None
-    //
-    // Returns:     int - the student's answer input as an integer
-    //
-    // ***************************************************************
-
-    public int getAnswer() {
-        // if an integer is not entered
-        while (!scanner.hasNextInt()) {
-            System.out.println("Please enter a valid integer.");
-            scanner.next(); // consume the invalid input
-        }
-        return scanner.nextInt();
     }
 
     // ***************************************************************
@@ -354,6 +271,64 @@ public class Program7 {
         else if (level == 3)
             totalQuestionsAdvanced += totalQuestions;
     }
+    
+    // ***************************************************************
+    // 
+    // Method:      handleStreak
+    // 
+    // Description: Checks if the streak of correct answers triggers a level progression.
+    // 
+    // Parameters:  int correctAnswersInRow
+    // 
+    // Returns:     boolean - false if game ends, true if the game continues
+    // 
+    // ***************************************************************
+    
+    private boolean handleStreak(int correctAnswersInRow) {
+        boolean resumeGame = true;
+        if (correctAnswersInRow >= 2) {
+            level = handleLevelProgression(correctAnswersInRow); // update the level
+            if (level == 0) {
+                resumeGame = false; // game ends
+            }
+        }
+        return resumeGame; // continue game if no level change occurred
+    }
+
+    // ***************************************************************
+    //
+    // Method:      handleLevelProgression
+    //
+    // Description: Manages level progression based on the player's
+    //              performance. If the player answers enough questions
+    //              correctly in a row, they are given the option to
+    //              move to the next level or stay at the current level.
+    //
+    // Parameters:  int correctAnswersInRow - the number of consecutive correct answers
+    //              int level - the current level of the game
+    //
+    // Returns:     int - the updated level or 0 if the player chooses to exit
+    //
+    // ***************************************************************
+
+    public int handleLevelProgression(int correctAnswersInRow) {
+        if (correctAnswersInRow >= 5) {
+            int choice = manageLevel();
+            if (choice == level) {
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("Continuing at *** Level " + level + " ***");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            } else if (choice == level + 1) {
+                level = choice; // update level here when moving up
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("Moving to *** Level " + level + " ***");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            } else if (choice == 0) {
+                return 0; // Exit the program
+            }
+        }
+        return level; // Return updated level or the same level
+    }
 
     // ***************************************************************
     //
@@ -380,10 +355,13 @@ public class Program7 {
             int choice = getAnswer(); // get user input
             switch (choice) {
                 case 1:
+                    logger.logContinueResponse(choice, level); 
                     return level; // stay at the current level
                 case 2:
-                    return (level < 3) ? level + 1 : level; // Move to the next level or stay at level 3
+                    logger.logContinueResponse(choice, level);
+                    return (level < 3) ? level + 1 : level; // move to the next level or stay at level 3
                 case 0:
+                    logger.logContinueResponse(choice, level);
                     showSummary();
                     logger.closeLogFile();
                     return 0; // exit the loop and return 0 to quit
@@ -391,6 +369,29 @@ public class Program7 {
                     System.out.println("Please enter a valid option.");
             }
         }
+    }
+
+    // ***************************************************************
+    //
+    // Method:      getAnswer
+    //
+    // Description: Prompts the user to enter an integer as their answer,
+    //              and ensures the input is a valid integer. If invalid input
+    //              is provided, it requests the user to enter a valid number.
+    //
+    // Parameters:  None
+    //
+    // Returns:     int - the student's answer input as an integer
+    //
+    // ***************************************************************
+
+    public int getAnswer() {
+        // if an integer is not entered
+        while (!scanner.hasNextInt()) {
+            System.out.println("Please enter a valid integer.");
+            scanner.next(); // consume the invalid input
+        }
+        return scanner.nextInt();
     }
 
     // ***************************************************************
